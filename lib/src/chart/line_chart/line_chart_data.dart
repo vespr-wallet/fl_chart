@@ -1202,7 +1202,7 @@ class LineTooltipItem with EquatableMixin {
   });
 
   /// Showing text.
-  final String text;
+  final String? text;
 
   /// Style of showing text.
   final TextStyle textStyle;
@@ -1214,7 +1214,7 @@ class LineTooltipItem with EquatableMixin {
   final TextDirection textDirection;
 
   /// Add further style and format to the text of the tooltip
-  final List<TextSpan>? children;
+  final List<InlineSpan>? children;
 
   /// Used for equality check, see [EquatableMixin].
   @override
