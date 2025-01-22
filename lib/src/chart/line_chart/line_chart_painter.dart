@@ -111,13 +111,6 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
         continue;
       }
 
-      drawBarLine(canvasWrapper, barData, holder);
-      drawDots(canvasWrapper, barData, holder);
-
-      if (data.extraLinesData.extraLinesOnTop) {
-        super.drawExtraLines(context, canvasWrapper, holder);
-      }
-
       final indicatorsData = data.lineTouchData
           .getTouchedSpotIndicator(barData, barData.showingIndicators);
 
@@ -141,6 +134,13 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
         lineIndexDrawingInfo.add(
           LineIndexDrawingInfo(barData, i, spot, index, indicatorData),
         );
+      }
+
+      drawBarLine(canvasWrapper, barData, holder, lineIndexDrawingInfo);
+      drawDots(canvasWrapper, barData, holder);
+
+      if (data.extraLinesData.extraLinesOnTop) {
+        super.drawExtraLines(context, canvasWrapper, holder);
       }
     }
 
@@ -232,8 +232,34 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
   void drawBarLine(
     CanvasWrapper canvasWrapper,
     LineChartBarData barData,
-    PaintHolder<LineChartData> holder,
-  ) {
+    PaintHolder<LineChartData> holder, [
+    List<LineIndexDrawingInfo> lineIndexDrawingInfo = const [],
+  ]) {
+    final touchedSpot = lineIndexDrawingInfo.firstOrNull?.spot;
+
+    final touthcedSpotIndex =
+        touchedSpot == null ? -1 : barData.spots.indexOf(touchedSpot);
+
+    // if there is a touched spot and it's not the last spot
+    if (touthcedSpotIndex >= 0 &&
+        touthcedSpotIndex < barData.spots.length - 1) {
+      final barDataBeforeIndex = barData.copyWith(
+        spots: barData.spots.sublist(0, touthcedSpotIndex + 1),
+      );
+
+      // includes also the last spot from {barDataBeforeIndex} otherwise
+      //  it won't draw a connection from it to the next point
+      final barDataAfterIndex = barData.copyWith(
+        spots: barData.spots.sublist(touthcedSpotIndex),
+        color: Colors.grey,
+      );
+
+      // call recursive and then return
+      drawBarLine(canvasWrapper, barDataBeforeIndex, holder);
+      drawBarLine(canvasWrapper, barDataAfterIndex, holder);
+      return;
+    }
+
     final viewSize = holder.getChartUsableSize(canvasWrapper.size);
 
     final barList = barData.spots.splitByNullSpots();
