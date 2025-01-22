@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 /// Parent class for several kind of touch/pointer events (like tap, panMode, longPressStart, ...)
-abstract class FlTouchEvent {
+sealed class FlTouchEvent {
   const FlTouchEvent();
 
   /// Represents the position of happened touch/pointer event
@@ -33,6 +33,7 @@ abstract class FlTouchEvent {
         this is! FlPanCancelEvent &&
         this is! FlPointerExitEvent &&
         this is! FlLongPressEnd &&
+        this is! FlLongPressCancelEvent &&
         this is! FlTapUpEvent &&
         this is! FlTapCancelEvent;
   }
@@ -197,6 +198,12 @@ class FlLongPressEnd extends FlTouchEvent {
   /// Represents the position of happened touch/pointer event
   @override
   Offset get localPosition => details.localPosition;
+}
+
+/// When the pointer that previously triggered a [FlLongPressStart] did not complete.
+/// Inspired from [GestureLongPressCancelCallback]
+class FlLongPressCancelEvent extends FlTouchEvent {
+  const FlLongPressCancelEvent();
 }
 
 /// The pointer has moved with respect to the device while the pointer is or is

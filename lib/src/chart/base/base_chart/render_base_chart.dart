@@ -106,6 +106,9 @@ abstract class RenderBaseChart<R extends BaseTouchResponse> extends RenderBox
           FlLongPressMoveUpdate(longPressMoveUpdateDetails),
         );
       }
+      ..onLongPressCancel = () {
+        _notifyTouchEvent(const FlLongPressCancelEvent());
+      }
       ..onLongPressEnd = (longPressEndDetails) =>
           _notifyTouchEvent(FlLongPressEnd(longPressEndDetails));
   }
