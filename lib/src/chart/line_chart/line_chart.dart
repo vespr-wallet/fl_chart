@@ -132,6 +132,14 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
     }
     _providedTouchCallback?.call(event, touchResponse);
 
+    if (event is FlTapCancelEvent || event is FlLongPressCancelEvent) {
+      // Kinda hacky workaround to fix a package bug where those events mistakenly delete the touch pop-up (tooltip)
+      //  while the user still has the finger on screen
+
+      // Proper fix is to independetly track tap/long press/pan events and know if any is active
+      return;
+    }
+
     if (!event.isInterestedForInteractions ||
         touchResponse?.lineBarSpots == null ||
         touchResponse!.lineBarSpots!.isEmpty) {
@@ -139,6 +147,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         _showingTouchedTooltips.clear();
         _showingTouchedIndicators.clear();
       });
+      // print('event: clear touch $event');
       return;
     }
 
@@ -156,6 +165,7 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       _showingTouchedTooltips
         ..clear()
         ..add(ShowingTooltipIndicators(sortedLineSpots));
+      // print('event: $event ; showing data: ${sortedLineSpots.isNotEmpty}');
     });
   }
 
