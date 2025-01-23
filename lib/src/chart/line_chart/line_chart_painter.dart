@@ -237,21 +237,31 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
   ]) {
     final touchedSpot = lineIndexDrawingInfo.firstOrNull?.spot;
 
-    final touthcedSpotIndex =
+    final touchedSpotIndex =
         touchedSpot == null ? -1 : barData.spots.indexOf(touchedSpot);
 
     // if there is a touched spot and it's not the last spot
-    if (touthcedSpotIndex >= 0 &&
-        touthcedSpotIndex < barData.spots.length - 1) {
+    if (touchedSpotIndex >= 0 &&
+        touchedSpotIndex < barData.spots.length - 1) {
       final barDataBeforeIndex = barData.copyWith(
-        spots: barData.spots.sublist(0, touthcedSpotIndex + 1),
+        spots: barData.spots.sublist(0, touchedSpotIndex + 1),
+        recomputeMostTopSpot: false,
+        recomputeMostBottomSpot: false,
       );
 
       // includes also the last spot from {barDataBeforeIndex} otherwise
       //  it won't draw a connection from it to the next point
+      final oldGradient = barDataBeforeIndex.gradient;
+      final newGradient = oldGradient is! LinearGradient //
+          ? null
+          : oldGradient.withOpacity(0.25);
+
       final barDataAfterIndex = barData.copyWith(
-        spots: barData.spots.sublist(touthcedSpotIndex),
-        color: Colors.grey,
+        spots: barData.spots.sublist(touchedSpotIndex),
+        gradient: newGradient,
+        color: newGradient == null ? Colors.grey : null,
+        recomputeMostTopSpot: false,
+        recomputeMostBottomSpot: false,
       );
 
       // call recursive and then return
