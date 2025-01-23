@@ -234,6 +234,8 @@ class LineChartBarData with EquatableMixin {
     this.spots = const [],
     this.show = true,
     Color? color,
+    this.disabledColor,
+    this.disabledColorGradientOpacity,
     Gradient? gradient,
     this.barWidth = 2.0,
     this.isCurved = false,
@@ -338,6 +340,11 @@ class LineChartBarData with EquatableMixin {
   /// It throws an exception if you provide both [color] and [gradient]
   final Color? color;
 
+  /// The unselected part of the chart is either this color or, for gradient, it's
+  /// the original gradient mixed with this color.
+  final Color? disabledColor;
+  final double? disabledColorGradientOpacity;
+
   /// If provided, this [LineChartBarData] draws with this [gradient].
   /// Otherwise we use [color] to draw the background.
   /// It throws an exception if you provide both [color] and [gradient]
@@ -430,6 +437,12 @@ class LineChartBarData with EquatableMixin {
         isStepLineChart: b.isStepLineChart,
         lineChartStepData:
             LineChartStepData.lerp(a.lineChartStepData, b.lineChartStepData, t),
+        disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
+        disabledColorGradientOpacity: lerpDouble(
+          a.disabledColorGradientOpacity,
+          b.disabledColorGradientOpacity,
+          t,
+        ),
       );
 
   /// Copies current [LineChartBarData] to a new [LineChartBarData],
@@ -438,6 +451,8 @@ class LineChartBarData with EquatableMixin {
     List<FlSpot>? spots,
     bool? show,
     Color? color,
+    Color? disabledColor,
+    double? disabledColorGradientOpacity,
     Gradient? gradient,
     double? barWidth,
     bool? isCurved,
@@ -465,6 +480,9 @@ class LineChartBarData with EquatableMixin {
         spots: spots ?? this.spots,
         show: show ?? this.show,
         color: color ?? this.color,
+        disabledColor: disabledColor ?? this.disabledColor,
+        disabledColorGradientOpacity:
+            disabledColorGradientOpacity ?? this.disabledColorGradientOpacity,
         gradient: gradient ?? this.gradient,
         barWidth: barWidth ?? this.barWidth,
         isCurved: isCurved ?? this.isCurved,
@@ -517,6 +535,8 @@ class LineChartBarData with EquatableMixin {
         shadow,
         isStepLineChart,
         lineChartStepData,
+        disabledColor,
+        disabledColorGradientOpacity,
       ];
 }
 

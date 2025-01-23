@@ -241,8 +241,7 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
         touchedSpot == null ? -1 : barData.spots.indexOf(touchedSpot);
 
     // if there is a touched spot and it's not the last spot
-    if (touchedSpotIndex >= 0 &&
-        touchedSpotIndex < barData.spots.length - 1) {
+    if (touchedSpotIndex >= 0 && touchedSpotIndex < barData.spots.length - 1) {
       final barDataBeforeIndex = barData.copyWith(
         spots: barData.spots.sublist(0, touchedSpotIndex + 1),
         recomputeMostTopSpot: false,
@@ -254,12 +253,30 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
       final oldGradient = barDataBeforeIndex.gradient;
       final newGradient = oldGradient is! LinearGradient //
           ? null
-          : oldGradient.withOpacity(0.25);
+          : LinearGradient(
+              begin: oldGradient.begin,
+              end: oldGradient.end,
+              colors: oldGradient.colors
+                  .map(
+                    (e) => Color.lerp(
+                      e,
+                      barData.disabledColor ?? Colors.grey,
+                      barData.disabledColorGradientOpacity?.clamp(0.0, 1.0) ??
+                          0.7,
+                    )!,
+                  )
+                  .toList(),
+              stops: oldGradient.stops,
+              tileMode: oldGradient.tileMode,
+              transform: oldGradient.transform,
+            );
 
       final barDataAfterIndex = barData.copyWith(
         spots: barData.spots.sublist(touchedSpotIndex),
         gradient: newGradient,
-        color: newGradient == null ? Colors.grey : null,
+        color: newGradient == null //
+            ? (barData.disabledColor ?? Colors.grey)
+            : null,
         recomputeMostTopSpot: false,
         recomputeMostBottomSpot: false,
       );
