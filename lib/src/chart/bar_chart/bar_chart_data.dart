@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 ///
 /// It holds data needed to draw a bar chart,
 /// including bar lines, colors, spaces, touches, ...
-class BarChartData extends AxisChartData with EquatableMixin {
+class BarChartData extends AxisChartData with Equatable {
   /// [BarChart] draws some [barGroups] and aligns them using [alignment],
   /// if [alignment] is [BarChartAlignment.center], you can define [groupsSpace]
   /// to apply space between them.
@@ -155,7 +155,7 @@ class BarChartData extends AxisChartData with EquatableMixin {
     }
   }
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         barGroups,
@@ -191,7 +191,7 @@ enum BarChartAlignment {
 /// in the [BarChart] we have some rods, they can be grouped or not,
 /// if you want to have grouped bars, simply put them in each group,
 /// otherwise just pass one of them in each group.
-class BarChartGroupData with EquatableMixin {
+class BarChartGroupData with Equatable {
   /// [BarChart] renders groups, and arrange them using [alignment],
   /// [x] value defines the group's value in the x axis (set them incrementally).
   /// it renders a list of [BarChartRodData] that represents a rod (or a bar) in the bar chart,
@@ -215,7 +215,6 @@ class BarChartGroupData with EquatableMixin {
   ///
   /// Note [x] does not reorder bars from [barRods]; instead, it gets the title
   /// in [x] position through [SideTitles.getTitlesWidget] function.
-  @required
   final int x;
 
   /// If set true, it will show bars below/above each other.
@@ -290,7 +289,7 @@ class BarChartGroupData with EquatableMixin {
         ),
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         x,
@@ -302,7 +301,7 @@ class BarChartGroupData with EquatableMixin {
 }
 
 /// Holds data about rendering each rod (or bar) in the [BarChart].
-class BarChartRodData with EquatableMixin {
+class BarChartRodData with Equatable {
   /// [BarChart] renders rods vertically from zero to [toY],
   /// and the x is equivalent to the [BarChartGroupData.x] value.
   ///
@@ -450,7 +449,7 @@ class BarChartRodData with EquatableMixin {
             lerpBarChartRodStackList(a.rodStackItems, b.rodStackItems, t),
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         fromY,
@@ -471,7 +470,7 @@ class BarChartRodData with EquatableMixin {
 ///
 /// Each [BarChartRodData] can have a list of [BarChartRodStackItem] (with different colors
 /// and position) to represent a Stacked Chart rod,
-class BarChartRodStackItem with EquatableMixin {
+class BarChartRodStackItem with Equatable {
   /// Renders a section of Stacked Chart from [fromY] to [toY] with [color]
   /// for example if you want to have a Stacked Chart with three colors:
   /// ```dart
@@ -532,7 +531,7 @@ class BarChartRodStackItem with EquatableMixin {
         BorderSide.lerp(a.borderSide, b.borderSide, t),
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [fromY, toY, color, borderSide];
 }
@@ -542,7 +541,7 @@ class BarChartRodStackItem with EquatableMixin {
 /// If you want to have a bar drawn in rear of the main rod, use [BarChartRodData.backDrawRodData],
 /// it uses to have a bar with a passive color in rear of the rod,
 /// for example you can use it as the maximum value place holder in rear of your rod.
-class BackgroundBarChartRodData with EquatableMixin {
+class BackgroundBarChartRodData with Equatable {
   /// It will be rendered in rear of the main rod,
   /// background starts to show from [fromY] to [toY],
   /// It draws with [color] or [gradient]. You must provide one of them,
@@ -592,7 +591,7 @@ class BackgroundBarChartRodData with EquatableMixin {
         show: b.show,
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         show,
@@ -608,7 +607,7 @@ class BackgroundBarChartRodData with EquatableMixin {
 /// There is a touch flow, explained [here](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/handle_touches.md)
 /// in a simple way, each chart's renderer captures the touch events, and passes the pointerEvent
 /// to the painter, and gets touched spot, and wraps it into a concrete [BarTouchResponse].
-class BarTouchData extends FlTouchData<BarTouchResponse> with EquatableMixin {
+class BarTouchData extends FlTouchData<BarTouchResponse> with Equatable {
   /// You can disable or enable the touch system using [enabled] flag,
   ///
   /// [touchCallback] notifies you about the happened touch/pointer events.
@@ -682,7 +681,7 @@ class BarTouchData extends FlTouchData<BarTouchResponse> with EquatableMixin {
         handleBuiltInTouches: handleBuiltInTouches ?? this.handleBuiltInTouches,
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         enabled,
@@ -709,7 +708,7 @@ enum TooltipDirection {
 }
 
 /// Holds representation data for showing tooltip popup on top of rods.
-class BarTouchTooltipData with EquatableMixin {
+class BarTouchTooltipData with Equatable {
   /// if [BarTouchData.handleBuiltInTouches] is true,
   /// [BarChart] shows a tooltip popup on top of rods automatically when touch happens,
   /// otherwise you can show it manually using [BarChartGroupData.showingTooltipIndicators].
@@ -793,7 +792,7 @@ class BarTouchTooltipData with EquatableMixin {
   /// Retrieves data for setting background color of the tooltip.
   final GetBarTooltipColor getTooltipColor;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         tooltipRoundedRadius,
@@ -840,7 +839,7 @@ BarTooltipItem? defaultBarTooltipItem(
 }
 
 /// Holds data needed for showing custom tooltip content.
-class BarTooltipItem with EquatableMixin {
+class BarTooltipItem with Equatable {
   /// content of the tooltip, is a [text] String with a [textStyle],
   /// [textDirection] and optional [children].
   BarTooltipItem(
@@ -866,7 +865,7 @@ class BarTooltipItem with EquatableMixin {
   /// Add further style and format to the text of the tooltip
   final List<TextSpan>? children;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         text,
@@ -913,7 +912,7 @@ class BarTouchResponse extends BaseTouchResponse {
 }
 
 /// It gives you information about the touched spot.
-class BarTouchedSpot extends TouchedSpot with EquatableMixin {
+class BarTouchedSpot extends TouchedSpot with Equatable {
   /// When touch happens, a [BarTouchedSpot] returns as a output,
   /// it tells you where the touch happened.
   /// [touchedBarGroup], and [touchedBarGroupIndex] tell you in which group touch happened,
@@ -944,7 +943,7 @@ class BarTouchedSpot extends TouchedSpot with EquatableMixin {
   /// It can be -1, if nothing found
   final int touchedStackItemIndex;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         touchedBarGroup,
