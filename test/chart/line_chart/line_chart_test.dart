@@ -1,3 +1,4 @@
+import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_data.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_scaffold_widget.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/scale_axis.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/transformation_config.dart';
@@ -120,6 +121,70 @@ void main() {
         find.byType(LineChartLeaf),
       );
       expect(lineChartLeaf.canBeScaled, false);
+    });
+
+    group('built-in touch handling (VESPR)', () {
+      // Spots every 8px or so, so any touch is within the default threshold.
+      LineChart chart(FlScaleAxis scaleAxis) => LineChart(
+            LineChartData(
+              lineBarsData: [
+                LineChartBarData(
+                  spots: List.generate(
+                    101,
+                    (i) => FlSpot(i.toDouble(), (i % 5).toDouble()),
+                  ),
+                ),
+              ],
+            ),
+            transformationConfig: FlTransformationConfig(scaleAxis: scaleAxis),
+          );
+
+      List<ShowingTooltipIndicators> tooltips(WidgetTester tester) => tester
+          .widget<LineChartLeaf>(find.byType(LineChartLeaf))
+          .targetData
+          .showingTooltipIndicators;
+
+      testWidgets('clears the touch when the scaling viewer takes the gesture',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          createTestWidget(chart: chart(FlScaleAxis.horizontal)),
+        );
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(LineChartLeaf)),
+        );
+        await tester.pump(kPressTimeout + const Duration(milliseconds: 50));
+        expect(tooltips(tester), isNotEmpty);
+
+        // Dragging before the long-press deadline hands the gesture to the
+        // viewer: the chart's tap and long press are cancelled, and no other
+        // chart event follows.
+        await gesture.moveBy(const Offset(80, 0));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(tooltips(tester), isEmpty);
+      });
+
+      testWidgets('keeps the touch when the long press takes over the tap',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          createTestWidget(chart: chart(FlScaleAxis.horizontal)),
+        );
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(LineChartLeaf)),
+        );
+        await tester.pump(kPressTimeout + const Duration(milliseconds: 50));
+        expect(tooltips(tester), isNotEmpty);
+
+        // The long press wins: the tap is cancelled, the touch goes on.
+        await tester.pump(kLongPressTimeout);
+        await tester.pump();
+        expect(tooltips(tester), isNotEmpty);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(tooltips(tester), isEmpty);
+      });
     });
 
     group('touch gesture', () {

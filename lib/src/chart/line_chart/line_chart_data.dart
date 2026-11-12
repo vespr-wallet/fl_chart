@@ -1,6 +1,4 @@
 // coverage:ignore-file
-// ignore_for_file: document_ignores
-
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
@@ -254,26 +252,15 @@ class LineChartBarData with EquatableMixin {
     this.shadow = const Shadow(color: Colors.transparent),
     this.isStepLineChart = false,
     this.lineChartStepData = const LineChartStepData(),
-    FlSpot overrideMostLeftSpot = FlSpot.nullSpot,
-    FlSpot overrideMostTopSpot = FlSpot.nullSpot,
-    FlSpot overrideMostRightSpot = FlSpot.nullSpot,
-    FlSpot overrideMostBottomSpot = FlSpot.nullSpot,
   })  : color =
             color ?? ((color == null && gradient == null) ? Colors.cyan : null),
         gradient = color == null ? gradient : null,
         belowBarData = belowBarData ?? BarAreaData(),
         aboveBarData = aboveBarData ?? BarAreaData() {
-    // ignore: omit_local_variable_types
-    FlSpot? mostLeft =
-        overrideMostLeftSpot.isNull() ? null : overrideMostLeftSpot;
-    // ignore: omit_local_variable_types
-    FlSpot? mostTop = overrideMostTopSpot.isNull() ? null : overrideMostTopSpot;
-    // ignore: omit_local_variable_types
-    FlSpot? mostRight =
-        overrideMostRightSpot.isNull() ? null : overrideMostRightSpot;
-    // ignore: omit_local_variable_types
-    FlSpot? mostBottom =
-        overrideMostBottomSpot.isNull() ? null : overrideMostBottomSpot;
+    FlSpot? mostLeft;
+    FlSpot? mostTop;
+    FlSpot? mostRight;
+    FlSpot? mostBottom;
 
     FlSpot? firstValidSpot;
     try {
@@ -287,23 +274,19 @@ class LineChartBarData with EquatableMixin {
         if (spot.isNull()) {
           continue;
         }
-        if (overrideMostLeftSpot.isNull() &&
-            (mostLeft == null || spot.x < mostLeft.x)) {
+        if (mostLeft == null || spot.x < mostLeft.x) {
           mostLeft = spot;
         }
 
-        if (overrideMostRightSpot.isNull() &&
-            (mostRight == null || spot.x > mostRight.x)) {
+        if (mostRight == null || spot.x > mostRight.x) {
           mostRight = spot;
         }
 
-        if (overrideMostTopSpot.isNull() &&
-            (mostTop == null || spot.y > mostTop.y)) {
+        if (mostTop == null || spot.y > mostTop.y) {
           mostTop = spot;
         }
 
-        if (overrideMostBottomSpot.isNull() &&
-            (mostBottom == null || spot.y < mostBottom.y)) {
+        if (mostBottom == null || spot.y < mostBottom.y) {
           mostBottom = spot;
         }
       }
@@ -429,8 +412,17 @@ class LineChartBarData with EquatableMixin {
           t,
         ),
         dashArray: lerpIntList(a.dashArray, b.dashArray, t),
-        color: Color.lerp(a.color, b.color, t),
-        gradient: Gradient.lerp(a.gradient, b.gradient, t),
+        // The constructor drops the gradient whenever a colour is set, so a
+        // solid <-> gradient animation lerps gradients only, with the solid
+        // side turned into a same-shaped gradient of its colour.
+        color: a.gradient == null && b.gradient == null
+            ? Color.lerp(a.color, b.color, t)
+            : null,
+        gradient: Gradient.lerp(
+          a.gradient ?? _solidGradientLike(a.color, b.gradient),
+          b.gradient ?? _solidGradientLike(b.color, a.gradient),
+          t,
+        ),
         spots: lerpFlSpotList(a.spots, b.spots, t)!,
         showingIndicators: b.showingIndicators,
         shadow: Shadow.lerp(a.shadow, b.shadow, t)!,
@@ -471,10 +463,6 @@ class LineChartBarData with EquatableMixin {
     Shadow? shadow,
     bool? isStepLineChart,
     LineChartStepData? lineChartStepData,
-    bool recomputeMostLeftSpot = true,
-    bool recomputeMostTopSpot = true,
-    bool recomputeMostRightSpot = true,
-    bool recomputeMostBottomSpot = true,
   }) =>
       LineChartBarData(
         spots: spots ?? this.spots,
@@ -502,14 +490,6 @@ class LineChartBarData with EquatableMixin {
         shadow: shadow ?? this.shadow,
         isStepLineChart: isStepLineChart ?? this.isStepLineChart,
         lineChartStepData: lineChartStepData ?? this.lineChartStepData,
-        overrideMostLeftSpot:
-            recomputeMostLeftSpot ? FlSpot.nullSpot : mostLeftSpot,
-        overrideMostTopSpot:
-            recomputeMostTopSpot ? FlSpot.nullSpot : mostTopSpot,
-        overrideMostRightSpot:
-            recomputeMostRightSpot ? FlSpot.nullSpot : mostRightSpot,
-        overrideMostBottomSpot:
-            recomputeMostBottomSpot ? FlSpot.nullSpot : mostBottomSpot,
       );
 
   /// Used for equality check, see [EquatableMixin].
@@ -1391,4 +1371,45 @@ class LineChartDataTween extends Tween<LineChartData> {
   /// Lerps a [LineChartData] based on [t] value, check [Tween.lerp].
   @override
   LineChartData lerp(double t) => begin!.lerp(begin!, end!, t);
+}
+
+/// A gradient shaped like [like] with every colour set to [color], so that
+/// [LineChartBarData.lerp] can crossfade a solid line into a gradient one.
+/// Null when there is nothing to match, which makes [Gradient.lerp] fade the
+/// other gradient in or out instead.
+Gradient? _solidGradientLike(Color? color, Gradient? like) {
+  if (color == null || like == null) {
+    return null;
+  }
+  final colors = List.filled(like.colors.length, color);
+  return switch (like) {
+    LinearGradient() => LinearGradient(
+        begin: like.begin,
+        end: like.end,
+        colors: colors,
+        stops: like.stops,
+        tileMode: like.tileMode,
+        transform: like.transform,
+      ),
+    RadialGradient() => RadialGradient(
+        center: like.center,
+        radius: like.radius,
+        colors: colors,
+        stops: like.stops,
+        tileMode: like.tileMode,
+        focal: like.focal,
+        focalRadius: like.focalRadius,
+        transform: like.transform,
+      ),
+    SweepGradient() => SweepGradient(
+        center: like.center,
+        startAngle: like.startAngle,
+        endAngle: like.endAngle,
+        colors: colors,
+        stops: like.stops,
+        tileMode: like.tileMode,
+        transform: like.transform,
+      ),
+    _ => null,
+  };
 }

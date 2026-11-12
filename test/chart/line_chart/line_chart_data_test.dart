@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../data_pool.dart';
@@ -218,6 +219,51 @@ void main() {
             ),
         true,
       );
+    });
+  });
+
+  group('LineChartBarData.lerp() between a colour and a gradient (VESPR)', () {
+    // Plain colours: a MaterialColor never equals the Color a lerp returns.
+    const red = Color(0xFFFF0000);
+    const green = Color(0xFF00FF00);
+    const blue = Color(0xFF0000FF);
+    const gradient = LinearGradient(colors: [blue, green]);
+    final solid = LineChartBarData(color: red, spots: const [FlSpot.zero]);
+    final graded =
+        LineChartBarData(gradient: gradient, spots: const [FlSpot.zero]);
+
+    test('solid to gradient crossfades the colours', () {
+      final mid = LineChartBarData.lerp(solid, graded, 0.5);
+      expect(mid.color, isNull);
+      expect(mid.gradient?.colors, [
+        Color.lerp(red, blue, 0.5),
+        Color.lerp(red, green, 0.5),
+      ]);
+      expect(
+        LineChartBarData.lerp(solid, graded, 0).gradient?.colors,
+        [red, red],
+      );
+      expect(
+        LineChartBarData.lerp(solid, graded, 1).gradient?.colors,
+        [blue, green],
+      );
+    });
+
+    test('gradient to solid crossfades the colours', () {
+      final mid = LineChartBarData.lerp(graded, solid, 0.25);
+      expect(mid.color, isNull);
+      expect(mid.gradient?.colors, [
+        Color.lerp(blue, red, 0.25),
+        Color.lerp(green, red, 0.25),
+      ]);
+    });
+
+    test('solid to solid still lerps the colour', () {
+      final solidBlue =
+          LineChartBarData(color: blue, spots: const [FlSpot.zero]);
+      final mid = LineChartBarData.lerp(solid, solidBlue, 0.5);
+      expect(mid.color, Color.lerp(red, blue, 0.5));
+      expect(mid.gradient, isNull);
     });
   });
 }

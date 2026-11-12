@@ -235,59 +235,28 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
     PaintHolder<LineChartData> holder, [
     List<LineIndexDrawingInfo> lineIndexDrawingInfo = const [],
   ]) {
-    final touchedSpot = lineIndexDrawingInfo.firstOrNull?.spot;
-
-    final touchedSpotIndex =
-        touchedSpot == null ? -1 : barData.spots.indexOf(touchedSpot);
-
-    // if there is a touched spot and it's not the last spot
-    if (touchedSpotIndex >= 0 && touchedSpotIndex < barData.spots.length - 1) {
-      final barDataBeforeIndex = barData.copyWith(
-        spots: barData.spots.sublist(0, touchedSpotIndex + 1),
-        recomputeMostTopSpot: false,
-        recomputeMostBottomSpot: false,
-      );
-
-      // includes also the last spot from {barDataBeforeIndex} otherwise
-      //  it won't draw a connection from it to the next point
-      final oldGradient = barDataBeforeIndex.gradient;
-      final newGradient = oldGradient is! LinearGradient //
-          ? null
-          : LinearGradient(
-              begin: oldGradient.begin,
-              end: oldGradient.end,
-              colors: oldGradient.colors
-                  .map(
-                    (e) => Color.lerp(
-                      e,
-                      barData.disabledColor ?? Colors.grey,
-                      barData.disabledColorGradientOpacity?.clamp(0.0, 1.0) ??
-                          0.7,
-                    )!,
-                  )
-                  .toList(),
-              stops: oldGradient.stops,
-              tileMode: oldGradient.tileMode,
-              transform: oldGradient.transform,
-            );
-
-      final barDataAfterIndex = barData.copyWith(
-        spots: barData.spots.sublist(touchedSpotIndex),
-        gradient: newGradient,
-        color: newGradient == null //
-            ? (barData.disabledColor ?? Colors.grey)
-            : null,
-        recomputeMostTopSpot: false,
-        recomputeMostBottomSpot: false,
-      );
-
-      // call recursive and then return
-      drawBarLine(canvasWrapper, barDataBeforeIndex, holder);
-      drawBarLine(canvasWrapper, barDataAfterIndex, holder);
-      return;
-    }
-
     final viewSize = holder.getChartUsableSize(canvasWrapper.size);
+
+    // VESPR: while a spot of this bar is touched, the line after it is drawn
+    // with the disabled colour. The path is built once from all spots and only
+    // the stroke is clipped at the touched x, so the curve, the area fills and
+    // the gradient bounds stay exactly as they are without a touch.
+    // ponytail: splitting by x assumes the spots are sorted by x.
+    final touchedSpotIndex = lineIndexDrawingInfo
+        .where((info) => identical(info.line, barData))
+        .firstOrNull
+        ?.spotIndex;
+    final touchedSpot = touchedSpotIndex != null &&
+            touchedSpotIndex >= 0 &&
+            touchedSpotIndex < barData.spots.length - 1
+        ? barData.spots[touchedSpotIndex]
+        : null;
+    final split = touchedSpot == null || touchedSpot.isNull()
+        ? null
+        : (
+            x: getPixelX(touchedSpot.x, viewSize, holder),
+            disabledBarData: _disabledBarData(barData),
+          );
 
     final barList = barData.spots.splitByNullSpots();
 
@@ -334,8 +303,57 @@ class LineChartPainter extends AxisChartPainter<LineChartData> {
         barData,
       );
       drawBarShadow(canvasWrapper, barPath, barData);
+
+      if (split == null) {
+        drawBar(canvasWrapper, barPath, barData, holder);
+        continue;
+      }
+
+      // Hard (non anti-aliased) clips, so no faint seam shows at the split.
+      const all = Rect.largest;
+      canvasWrapper
+        ..save()
+        ..clipRect(
+          Rect.fromLTRB(all.left, all.top, split.x, all.bottom),
+          doAntiAlias: false,
+        );
       drawBar(canvasWrapper, barPath, barData, holder);
+      canvasWrapper
+        ..restore()
+        ..save()
+        ..clipRect(
+          Rect.fromLTRB(split.x, all.top, all.right, all.bottom),
+          doAntiAlias: false,
+        );
+      drawBar(canvasWrapper, barPath, split.disabledBarData, holder);
+      canvasWrapper.restore();
     }
+  }
+
+  /// [barData] coloured for the part after the touched spot: a linear
+  /// gradient is mixed with [LineChartBarData.disabledColor], anything else
+  /// becomes that colour.
+  LineChartBarData _disabledBarData(LineChartBarData barData) {
+    final disabledColor = barData.disabledColor ?? Colors.grey;
+    final gradient = barData.gradient;
+    if (gradient is! LinearGradient) {
+      return barData.copyWith(color: disabledColor);
+    }
+    final opacity =
+        barData.disabledColorGradientOpacity?.clamp(0.0, 1.0) ?? 0.7;
+    return barData.copyWith(
+      gradient: LinearGradient(
+        begin: gradient.begin,
+        end: gradient.end,
+        colors: [
+          for (final color in gradient.colors)
+            Color.lerp(color, disabledColor, opacity) ?? disabledColor,
+        ],
+        stops: gradient.stops,
+        tileMode: gradient.tileMode,
+        transform: gradient.transform,
+      ),
+    );
   }
 
   @visibleForTesting

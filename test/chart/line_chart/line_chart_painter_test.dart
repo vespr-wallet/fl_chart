@@ -122,9 +122,11 @@ void main() {
 
       verify(mockCanvasWrapper.clipRect(any)).called(1);
       verify(mockCanvasWrapper.drawDot(any, any, any)).called(12);
-      // Both bars show an indicator, so each bar line is drawn in two parts
-      // (before the touched spot, and greyed out after it): 3 + 2 paths.
-      verify(mockCanvasWrapper.drawPath(any, any)).called(5);
+      // Only bar1 shows an indicator, so only its line is drawn twice (clipped
+      // before the touched spot, and greyed out after it). bar2 and the area
+      // between the bars are one path each: 2 + 1 + 1.
+      verify(mockCanvasWrapper.drawPath(any, any)).called(4);
+      verify(mockCanvasWrapper.clipRect(any, doAntiAlias: false)).called(2);
     });
     test('test 2', () {
       const viewSize = Size(400, 400);
@@ -331,9 +333,11 @@ void main() {
 
       verify(mockCanvasWrapper.clipRect(any)).called(1);
       verify(mockCanvasWrapper.drawDot(any, any, any)).called(12);
-      // Both bars show an indicator, so each bar line is drawn in two parts
-      // (before the touched spot, and greyed out after it): 3 + 2 paths.
-      verify(mockCanvasWrapper.drawPath(any, any)).called(5);
+      // Only bar1 shows an indicator, so only its line is drawn twice (clipped
+      // before the touched spot, and greyed out after it). bar2 and the area
+      // between the bars are one path each: 2 + 1 + 1.
+      verify(mockCanvasWrapper.drawPath(any, any)).called(4);
+      verify(mockCanvasWrapper.clipRect(any, doAntiAlias: false)).called(2);
     });
   });
 
@@ -4385,4 +4389,158 @@ void main() {
       verify(mockCanvasWrapper.drawRect(captureAny, captureAny)).called(4);
     });
   });
+
+  group('drawBarLine() with a touched spot (VESPR)', () {
+    const viewSize = Size(400, 400);
+    const indicator = TouchedSpotIndicatorData(
+      FlLine(color: MockData.color0),
+      FlDotData(),
+    );
+
+    late _RecordingLineChartPainter painter;
+    late MockCanvasWrapper mockCanvasWrapper;
+
+    setUp(() {
+      painter = _RecordingLineChartPainter();
+      mockCanvasWrapper = MockCanvasWrapper();
+      when(mockCanvasWrapper.size).thenAnswer((_) => viewSize);
+      when(mockCanvasWrapper.canvas).thenReturn(MockCanvas());
+    });
+
+    PaintHolder<LineChartData> holderFor(List<LineChartBarData> bars) {
+      final data = LineChartData(
+        minX: 0,
+        maxX: 4,
+        minY: 0,
+        maxY: 4,
+        lineBarsData: bars,
+      );
+      return PaintHolder<LineChartData>(data, data, TextScaler.noScaling);
+    }
+
+    double pixelX(double x, PaintHolder<LineChartData> holder) =>
+        painter.getPixelX(x, holder.getChartUsableSize(viewSize), holder);
+
+    test('a curved line keeps its full curve, split at the touched x', () {
+      final bar = LineChartBarData(
+        isCurved: true,
+        spots: const [
+          FlSpot(0, 1),
+          FlSpot(1, 4),
+          FlSpot(2, 0),
+          FlSpot(3, 3),
+          FlSpot(4, 2),
+        ],
+      );
+      final holder = holderFor([bar]);
+
+      painter.drawBarLine(mockCanvasWrapper, bar, holder, [
+        LineIndexDrawingInfo(bar, 0, bar.spots[2], 2, indicator),
+      ]);
+
+      // Both parts draw the one path built from all spots, so the curve
+      // around the touched spot is the same as without a touch.
+      expect(painter.drawnBars, hasLength(2));
+      final (before, _) = painter.drawnBars[0];
+      final (after, _) = painter.drawnBars[1];
+      expect(identical(before, after), isTrue);
+      final fullCurve = painter.generateBarPath(
+        holder.getChartUsableSize(viewSize),
+        bar,
+        bar.spots,
+        holder,
+      );
+      expect(before.getBounds(), fullCurve.getBounds());
+      expect(_pathLength(before), closeTo(_pathLength(fullCurve), 0.001));
+
+      final clips = verify(
+        mockCanvasWrapper.clipRect(captureAny, doAntiAlias: false),
+      ).captured.cast<Rect>();
+      expect(clips, hasLength(2));
+      expect(clips[0].right, pixelX(2, holder));
+      expect(clips[1].left, pixelX(2, holder));
+    });
+
+    test('both parts keep the gradient bounds of the whole line', () {
+      final bar = LineChartBarData(
+        disabledColor: Colors.black,
+        disabledColorGradientOpacity: 0.5,
+        gradient: const LinearGradient(colors: [Colors.red, Colors.blue]),
+        spots: const [
+          FlSpot(0, 1),
+          FlSpot(1, 4),
+          FlSpot(2, 0),
+          FlSpot(3, 3),
+          FlSpot(4, 2),
+        ],
+      );
+
+      painter.drawBarLine(mockCanvasWrapper, bar, holderFor([bar]), [
+        LineIndexDrawingInfo(bar, 0, bar.spots[2], 2, indicator),
+      ]);
+
+      expect(painter.drawnBars, hasLength(2));
+      for (final (_, drawn) in painter.drawnBars) {
+        expect(drawn.mostLeftSpot, bar.mostLeftSpot);
+        expect(drawn.mostRightSpot, bar.mostRightSpot);
+        expect(drawn.mostTopSpot, bar.mostTopSpot);
+        expect(drawn.mostBottomSpot, bar.mostBottomSpot);
+      }
+      final (_, before) = painter.drawnBars[0];
+      final (_, after) = painter.drawnBars[1];
+      expect(before.gradient, bar.gradient);
+      expect(after.gradient?.colors, [
+        Color.lerp(Colors.red, Colors.black, 0.5),
+        Color.lerp(Colors.blue, Colors.black, 0.5),
+      ]);
+    });
+
+    test("only the bar's own indicator splits it", () {
+      final bar1 = LineChartBarData(
+        spots: const [FlSpot.zero, FlSpot(1, 1), FlSpot(2, 2), FlSpot(3, 3)],
+      );
+      final bar2 = LineChartBarData(
+        color: Colors.green,
+        spots: const [FlSpot(0, 4), FlSpot(1, 1), FlSpot(2, 2), FlSpot(3, 0)],
+      );
+      final holder = holderFor([bar1, bar2]);
+      // bar1's indicator is first and its spot also exists in bar2.
+      final bar1Info =
+          LineIndexDrawingInfo(bar1, 0, bar1.spots[2], 2, indicator);
+
+      painter.drawBarLine(mockCanvasWrapper, bar2, holder, [bar1Info]);
+      expect(painter.drawnBars, hasLength(1));
+      verifyNever(mockCanvasWrapper.clipRect(any, doAntiAlias: false));
+
+      painter.drawnBars.clear();
+      painter.drawBarLine(mockCanvasWrapper, bar2, holder, [
+        bar1Info,
+        LineIndexDrawingInfo(bar2, 1, bar2.spots[1], 1, indicator),
+      ]);
+      expect(painter.drawnBars, hasLength(2));
+      final clips = verify(
+        mockCanvasWrapper.clipRect(captureAny, doAntiAlias: false),
+      ).captured.cast<Rect>();
+      expect(clips[0].right, pixelX(1, holder));
+    });
+  });
+}
+
+double _pathLength(Path path) =>
+    path.computeMetrics().fold(0, (sum, metric) => sum + metric.length);
+
+/// Records what [drawBar] is asked to draw.
+class _RecordingLineChartPainter extends LineChartPainter {
+  final drawnBars = <(Path, LineChartBarData)>[];
+
+  @override
+  void drawBar(
+    CanvasWrapper canvasWrapper,
+    Path barPath,
+    LineChartBarData barData,
+    PaintHolder<LineChartData> holder,
+  ) {
+    drawnBars.add((barPath, barData));
+    super.drawBar(canvasWrapper, barPath, barData, holder);
+  }
 }
