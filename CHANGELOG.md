@@ -1,3 +1,13 @@
+## 0.70.2+vespr.2
+Fixes for the VESPR touch changes from 0.70.2+vespr.1.
+
+* **BUGFIX** The touched line is no longer rebuilt as two separate lines. The path is generated once from all spots, and only its stroke is clipped at the touched x, so a curved line keeps its exact shape, the area fills don't change, and gradients keep their full horizontal and vertical bounds.
+* **BUGFIX** With several lines, each line is greyed out only after its own touched spot, never after another line's.
+* **BUGFIX** `LineChartBarData.lerp` crossfades between a solid colour and a gradient, instead of fading the colour out and snapping to the gradient at the end.
+* **BUGFIX** `LineChart`'s built-in touch handling clears the tooltip and the greyed-out part when a tap or long press is cancelled and no other chart gesture takes over (for example, when the scaling viewer claims the drag). It still keeps them when a long press takes over from a tap.
+* **BREAKING** Removed `LineChartBarData`'s `overrideMost…Spot` parameters and `copyWith`'s `recomputeMost…Spot` flags, which only the old split used.
+* **TOOLING** Removed the pub.dev publish workflow and set `publish_to: none`: this fork is consumed as a git dependency and must never be published.
+
 ## 0.70.2+vespr.1
 VESPR fork of fl_chart 0.70.2, with line chart touch changes for the VESPR price charts. The pubspec version stays `0.70.2`; the `+vespr.1` in the tag separates it from upstream's 0.70.2.
 
