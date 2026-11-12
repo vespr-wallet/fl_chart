@@ -3,10 +3,11 @@ Fixes for the VESPR touch changes from 0.70.2+vespr.1.
 
 * **BUGFIX** The touched line is no longer rebuilt as two separate lines. The path is generated once from all spots, and only its stroke is clipped at the touched x, so a curved line keeps its exact shape, the area fills don't change, and gradients keep their full horizontal and vertical bounds.
 * **BUGFIX** With several lines, each line is greyed out only after its own touched spot, never after another line's.
-* **BUGFIX** `LineChartBarData.lerp` crossfades between a solid colour and a gradient, instead of fading the colour out and snapping to the gradient at the end.
+* **BUGFIX** `LineChartBarData.lerp` crossfades between a solid colour and a gradient, instead of fading the colour out and snapping to the gradient at the end. At `t == 1` it returns the target's own colour or gradient.
 * **BUGFIX** `LineChart`'s built-in touch handling clears the tooltip and the greyed-out part when a tap or long press is cancelled and no other chart gesture takes over (for example, when the scaling viewer claims the drag). It still keeps them when a long press takes over from a tap.
 * **BREAKING** Removed `LineChartBarData`'s `overrideMost…Spot` parameters and `copyWith`'s `recomputeMost…Spot` flags, which only the old split used.
-* **TOOLING** Removed the pub.dev publish workflow and set `publish_to: none`: this fork is consumed as a git dependency and must never be published.
+* **TOOLING** Removed the pub.dev publish, Codecov upload and GitHub Pages deploy workflows, and set `publish_to: none`: this fork is consumed as a git dependency and must never publish anything. CI (`verification.yml`) is pinned to Flutter 3.50.0.
+* **TOOLING** Fixes for Flutter 3.50: `with Equatable` replaces the deprecated `EquatableMixin` (needs `equatable: ^2.1.0`), the `Matrix4` `…ByDouble` methods replace the deprecated `scale` / `translate` / `scaled` (needs `vector_math: ^2.2.0`), super parameters in the renderers, no more `@required` from `meta`, and a scaffold test finder that was ambiguous on Flutter 3.50.
 
 ## 0.70.2+vespr.1
 VESPR fork of fl_chart 0.70.2, with line chart touch changes for the VESPR price charts. The pubspec version stays `0.70.2`; the `+vespr.1` in the tag separates it from upstream's 0.70.2.
