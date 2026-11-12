@@ -1,3 +1,11 @@
+## 0.70.2+vespr.1
+VESPR fork of fl_chart 0.70.2, with line chart touch changes for the VESPR price charts. The pubspec version stays `0.70.2`; the `+vespr.1` in the tag separates it from upstream's 0.70.2.
+
+* **FEATURE** While a spot is touched, the line after it is drawn greyed out. `LineChartBarData.disabledColor` (default `Colors.grey`) and `disabledColorGradientOpacity` (default `0.7`, how far a gradient is blended towards the disabled colour) control the look.
+* **BUGFIX** A gradient line no longer breaks while the line is split at the touched spot. `LineChartBarData` takes `overrideMostLeftSpot` / `overrideMostTopSpot` / `overrideMostRightSpot` / `overrideMostBottomSpot`, and `copyWith` takes `recomputeMost…Spot` flags, so both halves keep the full line's bounds. `gradient` is ignored when `color` is set.
+* **FEATURE** New `FlLongPressCancelEvent`, sent when a long press is cancelled. **Breaking:** `FlTouchEvent` is now `sealed`.
+* **BUGFIX** (workaround) `LineChart`'s built-in touch handling ignores `FlTapCancelEvent` and `FlLongPressCancelEvent`, which otherwise hid the tooltip while the finger was still on the screen.
+
 ## 0.70.2
 * **FEATURE** (by @imaNNeo) Add error range feature in our axis-based charts. You can set `xError` and `yError` in the [FlSpot](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/base_chart.md#flspot) or `toYErrorRange` in [BarChartRodData](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/bar_chart.md#barchartroddata). Also we have `errorIndicatorData` property in our [LineChartData](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/line_chart.md#linechartdata), [BarChartData](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/bar_chart.md#barchartdata) and [ScatterChartData](https://github.com/imaNNeo/fl_chart/blob/main/repo_files/documentations/scatter_chart.md#scatterchartdata) that is responsible to render the error bars. You can take a look at the [LineChartSample 13](https://github.com/imaNNeo/fl_chart/blob/main/example/lib/presentation/samples/line/line_chart_sample13.dart) and [BarChartSample 8](https://github.com/imaNNeo/fl_chart/blob/main/example/lib/presentation/samples/bar/bar_chart_sample8.dart) in our [sample app](https://app.flchart.dev), #1483 
 
