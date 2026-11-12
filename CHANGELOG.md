@@ -7,6 +7,7 @@ Fixes for the VESPR touch changes from 0.70.2+vespr.1.
 * **BUGFIX** `LineChart`'s built-in touch handling clears the tooltip and the greyed-out part when a tap or long press is cancelled and no other chart gesture takes over (for example, when the scaling viewer claims the drag). It still keeps them when a long press takes over from a tap.
 * **BREAKING** Removed `LineChartBarData`'s `overrideMost…Spot` parameters and `copyWith`'s `recomputeMost…Spot` flags, which only the old split used.
 * **TOOLING** Removed the pub.dev publish, Codecov upload and GitHub Pages deploy workflows, and set `publish_to: none`: this fork is consumed as a git dependency and must never publish anything. CI (`verification.yml`) is pinned to Flutter 3.50.0.
+* **BREAKING** Requires Flutter 3.47 or newer (was 3.16). Imports `package:material_ui` and `package:cupertino_ui` instead of the deprecated `package:flutter/material.dart` / `cupertino.dart`, so `material_ui: ^1.8.0` and `cupertino_ui: ^1.1.4` are new dependencies. The Dart SDK floor stays `^3.2.0`.
 * **TOOLING** Fixes for Flutter 3.50: `with Equatable` replaces the deprecated `EquatableMixin` (needs `equatable: ^2.1.0`), the `Matrix4` `…ByDouble` methods replace the deprecated `scale` / `translate` / `scaled` (needs `vector_math: ^2.2.0`), super parameters in the renderers, no more `@required` from `meta`, and a scaffold test finder that was ambiguous on Flutter 3.50.
 
 ## 0.70.2+vespr.1

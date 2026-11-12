@@ -5,8 +5,8 @@ import 'package:fl_chart_app/urls.dart';
 import 'package:fl_chart_app/util/app_helper.dart';
 import 'package:fl_chart_app/util/app_utils.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'fl_chart_banner.dart';

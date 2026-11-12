@@ -2,8 +2,8 @@ import 'package:fl_chart_app/presentation/resources/app_resources.dart';
 import 'package:fl_chart_app/presentation/samples/chart_samples.dart';
 import 'package:fl_chart_app/presentation/widgets/chart_holder.dart';
 import 'package:fl_chart_app/util/app_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ChartSamplesPage extends StatelessWidget {
   final ChartType chartType;

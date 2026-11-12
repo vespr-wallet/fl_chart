@@ -1,6 +1,6 @@
 import 'package:fl_chart_app/presentation/resources/app_resources.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 class FlChartBanner extends StatelessWidget {
   const FlChartBanner({super.key});

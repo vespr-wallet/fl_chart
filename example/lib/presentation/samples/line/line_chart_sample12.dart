@@ -4,8 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fl_chart_app/presentation/presentation_utils.dart';
 import 'package:fl_chart_app/presentation/resources/app_colors.dart';
 import 'package:fl_chart_app/util/extensions/color_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LineChartSample12 extends StatefulWidget {
   const LineChartSample12({super.key});
