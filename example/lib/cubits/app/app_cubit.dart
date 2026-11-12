@@ -1,8 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:fl_chart_app/urls.dart';
 import 'package:fl_chart_app/util/app_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:equatable/equatable.dart';
 
 part 'app_state.dart';
 

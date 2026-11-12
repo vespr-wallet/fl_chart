@@ -4,8 +4,8 @@ import 'package:fl_chart_app/presentation/resources/app_resources.dart';
 import 'package:fl_chart_app/urls.dart';
 import 'package:fl_chart_app/util/app_helper.dart';
 import 'package:fl_chart_app/util/app_utils.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'chart_samples_page.dart';
 

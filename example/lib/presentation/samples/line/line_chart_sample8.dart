@@ -3,9 +3,9 @@ import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fl_chart_app/presentation/resources/app_resources.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LineChartSample8 extends StatefulWidget {
   const LineChartSample8({super.key});

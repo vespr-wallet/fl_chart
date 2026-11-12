@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Inspired from [Flex]
 class SideTitlesFlex extends MultiChildRenderObjectWidget {
@@ -279,7 +279,7 @@ class AxisSideMetaData {
   double get diff => maxValue - minValue;
 }
 
-class AxisSideTitleMetaData with EquatableMixin {
+class AxisSideTitleMetaData with Equatable {
   AxisSideTitleMetaData(this.axisValue, this.axisPixelLocation);
   final double axisValue;
   final double axisPixelLocation;

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_scaffold_widget.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/scale_axis.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/transformation_config.dart';
@@ -6,8 +9,7 @@ import 'package:fl_chart/src/chart/base/base_chart/fl_touch_event.dart';
 import 'package:fl_chart/src/chart/line_chart/line_chart_data.dart';
 import 'package:fl_chart/src/chart/line_chart/line_chart_helper.dart';
 import 'package:fl_chart/src/chart/line_chart/line_chart_renderer.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Renders a line chart as a widget, using provided [LineChartData].
 class LineChart extends ImplicitlyAnimatedWidget {
@@ -52,6 +54,10 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
   final List<ShowingTooltipIndicators> _showingTouchedTooltips = [];
 
   final Map<int, List<int>> _showingTouchedIndicators = {};
+
+  /// Bumped on every touch event, so a deferred clear can tell whether
+  /// anything happened after the cancel that scheduled it.
+  int _touchEventCount = 0;
 
   final _lineChartHelper = LineChartHelper();
 
@@ -131,23 +137,27 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
       return;
     }
     _providedTouchCallback?.call(event, touchResponse);
+    final eventCount = ++_touchEventCount;
 
     if (event is FlTapCancelEvent || event is FlLongPressCancelEvent) {
-      // Kinda hacky workaround to fix a package bug where those events mistakenly delete the touch pop-up (tooltip)
-      //  while the user still has the finger on screen
-
-      // Proper fix is to independetly track tap/long press/pan events and know if any is active
+      // A tap or long press is cancelled when another recognizer wins the
+      // gesture. When it is one of the chart's own (a long press after a tap)
+      // its event comes in the same dispatch, and the touch goes on. When it
+      // isn't (for example the scaling viewer took the gesture), nothing
+      // follows, so clear the touch state once this dispatch is done. A pan
+      // that wins later re-sets the state within the same frame.
+      scheduleMicrotask(() {
+        if (mounted && eventCount == _touchEventCount) {
+          _clearTouchState();
+        }
+      });
       return;
     }
 
     if (!event.isInterestedForInteractions ||
         touchResponse?.lineBarSpots == null ||
         touchResponse!.lineBarSpots!.isEmpty) {
-      setState(() {
-        _showingTouchedTooltips.clear();
-        _showingTouchedIndicators.clear();
-      });
-      // print('event: clear touch $event');
+      _clearTouchState();
       return;
     }
 
@@ -166,6 +176,13 @@ class _LineChartState extends AnimatedWidgetBaseState<LineChart> {
         ..clear()
         ..add(ShowingTooltipIndicators(sortedLineSpots));
       // print('event: $event ; showing data: ${sortedLineSpots.isNotEmpty}');
+    });
+  }
+
+  void _clearTouchState() {
+    setState(() {
+      _showingTouchedTooltips.clear();
+      _showingTouchedIndicators.clear();
     });
   }
 

@@ -6,13 +6,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fl_chart/src/chart/scatter_chart/scatter_chart_helper.dart';
 import 'package:fl_chart/src/extensions/color_extension.dart';
 import 'package:fl_chart/src/utils/lerp.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// [ScatterChart] needs this class to render itself.
 ///
 /// It holds data needed to draw a scatter chart,
 /// including background color, scatter spots, ...
-class ScatterChartData extends AxisChartData with EquatableMixin {
+class ScatterChartData extends AxisChartData with Equatable {
   /// [ScatterChart] draws some points in a square space,
   /// points are defined by [scatterSpots],
   ///
@@ -178,7 +178,7 @@ class ScatterChartData extends AxisChartData with EquatableMixin {
         errorIndicatorData: errorIndicatorData ?? this.errorIndicatorData,
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         scatterSpots,
@@ -205,7 +205,7 @@ class ScatterChartData extends AxisChartData with EquatableMixin {
 }
 
 /// Defines information about a spot in the [ScatterChart]
-class ScatterSpot extends FlSpot with EquatableMixin {
+class ScatterSpot extends FlSpot with Equatable {
   /// You can change [show] value to show or hide the spot,
   /// [x], and [y] defines the location of spot in the [ScatterChart],
   /// [radius] defines the size of spot, and [color] defines the color of it.
@@ -278,7 +278,7 @@ class ScatterSpot extends FlSpot with EquatableMixin {
         yError: FlErrorRange.lerp(a.yError, b.yError, t),
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         x,
@@ -297,7 +297,7 @@ class ScatterSpot extends FlSpot with EquatableMixin {
 /// in a simple way, each chart's renderer captures the touch events, and passes the pointerEvent
 /// to the painter, and gets touched spot, and wraps it into a concrete [ScatterTouchResponse].
 class ScatterTouchData extends FlTouchData<ScatterTouchResponse>
-    with EquatableMixin {
+    with Equatable {
   /// You can disable or enable the touch system using [enabled] flag,
   ///
   /// [touchCallback] notifies you about the happened touch/pointer events.
@@ -362,7 +362,7 @@ class ScatterTouchData extends FlTouchData<ScatterTouchResponse>
         touchSpotThreshold: touchSpotThreshold ?? this.touchSpotThreshold,
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         enabled,
@@ -401,7 +401,7 @@ class ScatterTouchResponse extends BaseTouchResponse {
 }
 
 /// Holds the touched spot data
-class ScatterTouchedSpot with EquatableMixin {
+class ScatterTouchedSpot with Equatable {
   /// [spot], and [spotIndex] tells you
   /// in which spot (of [ScatterChartData.scatterSpots]) touch happened.
   const ScatterTouchedSpot(this.spot, this.spotIndex);
@@ -412,7 +412,7 @@ class ScatterTouchedSpot with EquatableMixin {
   /// Touch happened on this spot index
   final int spotIndex;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         spot,
@@ -429,7 +429,7 @@ class ScatterTouchedSpot with EquatableMixin {
 }
 
 /// Holds representation data for showing tooltip popup on top of spots.
-class ScatterTouchTooltipData with EquatableMixin {
+class ScatterTouchTooltipData with Equatable {
   /// if [ScatterTouchData.handleBuiltInTouches] is true,
   /// [ScatterChart] shows a tooltip popup on top of spots automatically when touch happens,
   /// otherwise you can show it manually using [ScatterChartData.showingTooltipIndicators].
@@ -502,7 +502,7 @@ class ScatterTouchTooltipData with EquatableMixin {
   /// Retrieves data for showing content inside the tooltip.
   final GetScatterTooltipColor getTooltipColor;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         tooltipRoundedRadius,
@@ -595,7 +595,7 @@ Color defaultScatterTooltipColor(ScatterSpot touchedSpot) =>
     Colors.blueGrey.darken(15);
 
 /// Holds data of showing each item in the tooltip popup.
-class ScatterTooltipItem with EquatableMixin {
+class ScatterTooltipItem with Equatable {
   /// Shows a [text] with [textStyle], [textDirection],  and optional [children] in the tooltip popup,
   /// [bottomMargin] is the bottom space from spot.
   ScatterTooltipItem(
@@ -627,7 +627,7 @@ class ScatterTooltipItem with EquatableMixin {
   /// Add further style and format to the text of the tooltip
   final List<TextSpan>? children;
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         text,
@@ -698,7 +698,7 @@ String getDefaultLabelFunction(
     spot.defaultLabel;
 
 /// Defines information about the labels in the [ScatterChart]
-class ScatterLabelSettings with EquatableMixin {
+class ScatterLabelSettings with Equatable {
   /// You can change [showLabel] value to show or hide the label,
   /// [textStyle] defines the style of label in the [ScatterChart].
   ScatterLabelSettings({
@@ -752,7 +752,7 @@ class ScatterLabelSettings with EquatableMixin {
         textDirection: b.textDirection,
       );
 
-  /// Used for equality check, see [EquatableMixin].
+  /// Used for equality check, see [Equatable].
   @override
   List<Object?> get props => [
         showLabel,

@@ -5,8 +5,8 @@ import 'package:fl_chart/src/chart/base/axis_chart/axis_chart_scaffold_widget.da
 import 'package:fl_chart/src/chart/base/axis_chart/scale_axis.dart';
 import 'package:fl_chart/src/chart/base/axis_chart/transformation_config.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   Widget createTestWidget({
