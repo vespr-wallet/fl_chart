@@ -1,4 +1,6 @@
 // coverage:ignore-file
+// ignore_for_file: document_ignores
+
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
@@ -232,7 +234,9 @@ class LineChartBarData with EquatableMixin {
     this.spots = const [],
     this.show = true,
     Color? color,
-    this.gradient,
+    this.disabledColor,
+    this.disabledColorGradientOpacity,
+    Gradient? gradient,
     this.barWidth = 2.0,
     this.isCurved = false,
     this.curveSmoothness = 0.35,
@@ -250,14 +254,26 @@ class LineChartBarData with EquatableMixin {
     this.shadow = const Shadow(color: Colors.transparent),
     this.isStepLineChart = false,
     this.lineChartStepData = const LineChartStepData(),
+    FlSpot overrideMostLeftSpot = FlSpot.nullSpot,
+    FlSpot overrideMostTopSpot = FlSpot.nullSpot,
+    FlSpot overrideMostRightSpot = FlSpot.nullSpot,
+    FlSpot overrideMostBottomSpot = FlSpot.nullSpot,
   })  : color =
             color ?? ((color == null && gradient == null) ? Colors.cyan : null),
+        gradient = color == null ? gradient : null,
         belowBarData = belowBarData ?? BarAreaData(),
         aboveBarData = aboveBarData ?? BarAreaData() {
-    FlSpot? mostLeft;
-    FlSpot? mostTop;
-    FlSpot? mostRight;
-    FlSpot? mostBottom;
+    // ignore: omit_local_variable_types
+    FlSpot? mostLeft =
+        overrideMostLeftSpot.isNull() ? null : overrideMostLeftSpot;
+    // ignore: omit_local_variable_types
+    FlSpot? mostTop = overrideMostTopSpot.isNull() ? null : overrideMostTopSpot;
+    // ignore: omit_local_variable_types
+    FlSpot? mostRight =
+        overrideMostRightSpot.isNull() ? null : overrideMostRightSpot;
+    // ignore: omit_local_variable_types
+    FlSpot? mostBottom =
+        overrideMostBottomSpot.isNull() ? null : overrideMostBottomSpot;
 
     FlSpot? firstValidSpot;
     try {
@@ -271,19 +287,23 @@ class LineChartBarData with EquatableMixin {
         if (spot.isNull()) {
           continue;
         }
-        if (mostLeft == null || spot.x < mostLeft.x) {
+        if (overrideMostLeftSpot.isNull() &&
+            (mostLeft == null || spot.x < mostLeft.x)) {
           mostLeft = spot;
         }
 
-        if (mostRight == null || spot.x > mostRight.x) {
+        if (overrideMostRightSpot.isNull() &&
+            (mostRight == null || spot.x > mostRight.x)) {
           mostRight = spot;
         }
 
-        if (mostTop == null || spot.y > mostTop.y) {
+        if (overrideMostTopSpot.isNull() &&
+            (mostTop == null || spot.y > mostTop.y)) {
           mostTop = spot;
         }
 
-        if (mostBottom == null || spot.y < mostBottom.y) {
+        if (overrideMostBottomSpot.isNull() &&
+            (mostBottom == null || spot.y < mostBottom.y)) {
           mostBottom = spot;
         }
       }
@@ -319,6 +339,11 @@ class LineChartBarData with EquatableMixin {
   /// Otherwise we use  [gradient] to draw the background.
   /// It throws an exception if you provide both [color] and [gradient]
   final Color? color;
+
+  /// The unselected part of the chart is either this color or, for gradient, it's
+  /// the original gradient mixed with this color.
+  final Color? disabledColor;
+  final double? disabledColorGradientOpacity;
 
   /// If provided, this [LineChartBarData] draws with this [gradient].
   /// Otherwise we use [color] to draw the background.
@@ -412,6 +437,12 @@ class LineChartBarData with EquatableMixin {
         isStepLineChart: b.isStepLineChart,
         lineChartStepData:
             LineChartStepData.lerp(a.lineChartStepData, b.lineChartStepData, t),
+        disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
+        disabledColorGradientOpacity: lerpDouble(
+          a.disabledColorGradientOpacity,
+          b.disabledColorGradientOpacity,
+          t,
+        ),
       );
 
   /// Copies current [LineChartBarData] to a new [LineChartBarData],
@@ -420,6 +451,8 @@ class LineChartBarData with EquatableMixin {
     List<FlSpot>? spots,
     bool? show,
     Color? color,
+    Color? disabledColor,
+    double? disabledColorGradientOpacity,
     Gradient? gradient,
     double? barWidth,
     bool? isCurved,
@@ -438,11 +471,18 @@ class LineChartBarData with EquatableMixin {
     Shadow? shadow,
     bool? isStepLineChart,
     LineChartStepData? lineChartStepData,
+    bool recomputeMostLeftSpot = true,
+    bool recomputeMostTopSpot = true,
+    bool recomputeMostRightSpot = true,
+    bool recomputeMostBottomSpot = true,
   }) =>
       LineChartBarData(
         spots: spots ?? this.spots,
         show: show ?? this.show,
         color: color ?? this.color,
+        disabledColor: disabledColor ?? this.disabledColor,
+        disabledColorGradientOpacity:
+            disabledColorGradientOpacity ?? this.disabledColorGradientOpacity,
         gradient: gradient ?? this.gradient,
         barWidth: barWidth ?? this.barWidth,
         isCurved: isCurved ?? this.isCurved,
@@ -462,6 +502,14 @@ class LineChartBarData with EquatableMixin {
         shadow: shadow ?? this.shadow,
         isStepLineChart: isStepLineChart ?? this.isStepLineChart,
         lineChartStepData: lineChartStepData ?? this.lineChartStepData,
+        overrideMostLeftSpot:
+            recomputeMostLeftSpot ? FlSpot.nullSpot : mostLeftSpot,
+        overrideMostTopSpot:
+            recomputeMostTopSpot ? FlSpot.nullSpot : mostTopSpot,
+        overrideMostRightSpot:
+            recomputeMostRightSpot ? FlSpot.nullSpot : mostRightSpot,
+        overrideMostBottomSpot:
+            recomputeMostBottomSpot ? FlSpot.nullSpot : mostBottomSpot,
       );
 
   /// Used for equality check, see [EquatableMixin].
@@ -487,6 +535,8 @@ class LineChartBarData with EquatableMixin {
         shadow,
         isStepLineChart,
         lineChartStepData,
+        disabledColor,
+        disabledColorGradientOpacity,
       ];
 }
 

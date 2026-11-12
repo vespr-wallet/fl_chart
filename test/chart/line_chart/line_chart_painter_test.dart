@@ -122,7 +122,9 @@ void main() {
 
       verify(mockCanvasWrapper.clipRect(any)).called(1);
       verify(mockCanvasWrapper.drawDot(any, any, any)).called(12);
-      verify(mockCanvasWrapper.drawPath(any, any)).called(3);
+      // Both bars show an indicator, so each bar line is drawn in two parts
+      // (before the touched spot, and greyed out after it): 3 + 2 paths.
+      verify(mockCanvasWrapper.drawPath(any, any)).called(5);
     });
     test('test 2', () {
       const viewSize = Size(400, 400);
@@ -329,7 +331,9 @@ void main() {
 
       verify(mockCanvasWrapper.clipRect(any)).called(1);
       verify(mockCanvasWrapper.drawDot(any, any, any)).called(12);
-      verify(mockCanvasWrapper.drawPath(any, any)).called(3);
+      // Both bars show an indicator, so each bar line is drawn in two parts
+      // (before the touched spot, and greyed out after it): 3 + 2 paths.
+      verify(mockCanvasWrapper.drawPath(any, any)).called(5);
     });
   });
 
