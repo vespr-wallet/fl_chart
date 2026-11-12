@@ -850,9 +850,15 @@ class MockLineChartPainter extends _i1.Mock implements _i10.LineChartPainter {
   void drawBarLine(
     _i11.CanvasWrapper? canvasWrapper,
     _i13.LineChartBarData? barData,
-    _i12.PaintHolder<_i13.LineChartData>? holder,
-  ) => super.noSuchMethod(
-    Invocation.method(#drawBarLine, [canvasWrapper, barData, holder]),
+    _i12.PaintHolder<_i13.LineChartData>? holder, [
+    List<_i10.LineIndexDrawingInfo>? lineIndexDrawingInfo = const [],
+  ]) => super.noSuchMethod(
+    Invocation.method(#drawBarLine, [
+      canvasWrapper,
+      barData,
+      holder,
+      lineIndexDrawingInfo,
+    ]),
     returnValueForMissingStub: null,
   );
 
