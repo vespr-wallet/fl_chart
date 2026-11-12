@@ -258,6 +258,12 @@ void main() {
       ]);
     });
 
+    test('gradient to solid ends as the solid colour', () {
+      final end = LineChartBarData.lerp(graded, solid, 1);
+      expect(end.color, red);
+      expect(end.gradient, isNull);
+    });
+
     test('solid to solid still lerps the colour', () {
       final solidBlue =
           LineChartBarData(color: blue, spots: const [FlSpot.zero]);
