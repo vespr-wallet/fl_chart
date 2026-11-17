@@ -1,3 +1,6 @@
+## Unreleased
+* **TOOLING** CI (`verification.yml`) uses `actions/checkout@v7` (was v4).
+
 ## 0.70.2+vespr.2
 Fixes for the VESPR touch changes from 0.70.2+vespr.1.
 
