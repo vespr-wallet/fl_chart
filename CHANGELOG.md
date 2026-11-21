@@ -1,6 +1,7 @@
 ## Unreleased
 * **TOOLING** CI (`verification.yml`) uses `actions/checkout@v7` (was v4).
 * **TOOLING** CI (`verification.yml`) is pinned to Flutter 3.50.1 (was 3.50.0). The package and example `analysis_options.yaml` exclude build output, as Flutter 3.50 writes it on `pub get`.
+* **TOOLING** The example app builds on Flutter 3.50. Android moves to AGP 9.3.1, Gradle 9.5.0, Kotlin 2.4.21 and Java 17 (Flutter 3.50 rejects AGP below 9.1.1), the iOS project takes the migrations Flutter applies on build (UIScene lifecycle, Podfile), and the desktop plugin registrants match `example/pubspec.lock` again. The library itself is unchanged.
 
 ## 0.70.2+vespr.2
 Fixes for the VESPR touch changes from 0.70.2+vespr.1.
